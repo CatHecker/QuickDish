@@ -1,10 +1,20 @@
-﻿namespace QuickDish.Extensions;
+﻿using QuickDish.Clients;
+using QuickDish.Services;
+
+namespace QuickDish.Extensions;
 
 public static class HostingExtensions
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
+        
+        services.AddHttpClient<IMealDbClient, MealDbClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://www.themealdb.com/api/json/v1/1/");
+        });
+        
+        services.AddScoped<IRecipeService, RecipeService>();
         
         services.AddSwaggerGen();
         services.AddEndpointsApiExplorer();
@@ -34,15 +44,6 @@ public static class HostingExtensions
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        return app;
-    }
-
-    public static WebApplication HealthCheck(this WebApplication app)
-    {
-        app.MapGet("/api/health", () => 
-        {
-            return Results.Ok(new { status = "OK", timestamp = DateTime.UtcNow });
-        });
         return app;
     }
 }
